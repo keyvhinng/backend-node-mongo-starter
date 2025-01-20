@@ -12,6 +12,7 @@ mongoose
   })
   .catch((error) => {
     logger.error("DB: Unable to connect to the database");
+    logger.error(error);
   });
 
 

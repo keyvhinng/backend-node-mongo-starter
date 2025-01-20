@@ -4,29 +4,7 @@ import { ApiError } from '../utils/api-error';
 import { UserService } from '../services/user.service';
 
 export class UserController {
-  private userService: UserService;
-
-  constructor() {
-    this.userService = new UserService();
-  }
-
-  async createUser(req: Request, res: Response) {
-    try {
-      const userData = req.body;
-      const newUser = await this.userService.createUser();
-      res.status(201).json(newUser);
-    } catch (error) {
-      if (error instanceof ApiError) {
-        res.status(error.statusCode).json({
-          message: error.message,
-        });
-      } else {
-        res.status(500).json({
-          message: 'Internal Server error',
-        });
-      }
-    }
-  }
+  constructor(private readonly userService: UserService) {}
 
   async getUserById(req: Request, res: Response) {
     try {
@@ -41,10 +19,17 @@ export class UserController {
     return;
   }
 
-  async getUsers(req: Request, res: Response) {
+  async getAllUsers(_: Request, res: Response) {
     try {
-      const users = await this.userService.getUsers();
-      res.status(200).json(users);
+      const users = await this.userService.getAllUsers();
+      res.status(200).json({
+        users: users.map((user) => ({
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        })),
+      });
     } catch (error) {
       if (error instanceof ApiError) {
         res.status(error.statusCode).json({ message: error.message });
@@ -70,7 +55,15 @@ export class UserController {
         return;
       }
 
-      res.status(200).json({ sucess: true, data: updatedUser });
+      res.status(200).json({
+        sucess: true,
+        data: {
+          id: updatedUser._id,
+          email: updatedUser.email,
+          name: updatedUser.name,
+          role: updatedUser.role,
+        },
+      });
     } catch (error) {
       if (error instanceof ApiError) {
         res.status(error.statusCode).json({ message: error.message });
